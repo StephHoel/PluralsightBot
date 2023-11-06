@@ -9,6 +9,7 @@ using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs.Choices;
 using PluralsightBot.Models;
 using System.Text.RegularExpressions;
+using PluralsightBot.Helpers;
 
 namespace PluralsightBot.Dialogs
 {
@@ -39,10 +40,10 @@ namespace PluralsightBot.Dialogs
 
             // Add Named Dialogs
             AddDialog(new WaterfallDialog($"{nameof(BugReportDialog)}.mainFlow", waterfallSteps));
-            AddDialog(new TextPrompt($"{nameof(BugReportDialog)}.description"));
-            AddDialog(new DateTimePrompt($"{nameof(BugReportDialog)}.callbackTime", CallbackTimeValidatorAsync));
-            AddDialog(new TextPrompt($"{nameof(BugReportDialog)}.phoneNumber", PhoneNumberValidatorAsync));
-            AddDialog(new ChoicePrompt($"{nameof(BugReportDialog)}.bug"));
+            AddDialog(new TextPrompt($"{nameof(BugReportDialog)}.{PropertiesEnum.description}"));
+            AddDialog(new DateTimePrompt($"{nameof(BugReportDialog)}.{PropertiesEnum.callbackTime}", CallbackTimeValidatorAsync));
+            AddDialog(new TextPrompt($"{nameof(BugReportDialog)}.{PropertiesEnum.phoneNumber}", PhoneNumberValidatorAsync));
+            AddDialog(new ChoicePrompt($"{nameof(BugReportDialog)}.{PropertiesEnum.bug}"));
 
             // Set the starting Dialog
             InitialDialogId = $"{nameof(BugReportDialog)}.mainFlow";
@@ -51,7 +52,7 @@ namespace PluralsightBot.Dialogs
         #region Waterfall Steps
         private async Task<DialogTurnResult> DescriptionStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            return await stepContext.PromptAsync($"{nameof(BugReportDialog)}.description", new PromptOptions
+            return await stepContext.PromptAsync($"{nameof(BugReportDialog)}.{PropertiesEnum.description}", new PromptOptions
             {
                 Prompt = MessageFactory.Text("Enter a description for your report")
             }, cancellationToken);
@@ -59,9 +60,9 @@ namespace PluralsightBot.Dialogs
 
         private async Task<DialogTurnResult> CallbackTimeStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            stepContext.Values["description"] = (string)stepContext.Result;
+            stepContext.Values[PropertiesEnum.description.ToString()] = (string)stepContext.Result;
 
-            return await stepContext.PromptAsync($"{nameof(BugReportDialog)}.callbackTime", new PromptOptions
+            return await stepContext.PromptAsync($"{nameof(BugReportDialog)}.{PropertiesEnum.callbackTime}", new PromptOptions
             {
                 Prompt = MessageFactory.Text("Please enter in a callback time"),
                 RetryPrompt = MessageFactory.Text("The value entered must be between the hours of 9 am and 5 pm."),
@@ -70,9 +71,9 @@ namespace PluralsightBot.Dialogs
 
         private async Task<DialogTurnResult> PhoneNumberStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            stepContext.Values["callbackTime"] = Convert.ToDateTime(((List<DateTimeResolution>)stepContext.Result).FirstOrDefault().Value);
+            stepContext.Values[PropertiesEnum.callbackTime.ToString()] = Convert.ToDateTime(((List<DateTimeResolution>)stepContext.Result).FirstOrDefault().Value);
 
-            return await stepContext.PromptAsync($"{nameof(BugReportDialog)}.phoneNumber",
+            return await stepContext.PromptAsync($"{nameof(BugReportDialog)}.{PropertiesEnum.phoneNumber}",
             new PromptOptions
             {
                 Prompt = MessageFactory.Text("Please enter in a phone number that we can call you back at"),
@@ -82,9 +83,9 @@ namespace PluralsightBot.Dialogs
 
         private async Task<DialogTurnResult> BugStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            stepContext.Values["phoneNumber"] = (string)stepContext.Result;
+            stepContext.Values[PropertiesEnum.phoneNumber.ToString()] = (string)stepContext.Result;
 
-            return await stepContext.PromptAsync($"{nameof(BugReportDialog)}.bug",
+            return await stepContext.PromptAsync($"{nameof(BugReportDialog)}.{PropertiesEnum.bug}",
             new PromptOptions
             {
                 Prompt = MessageFactory.Text("Please enter the type of bug."),
@@ -94,16 +95,16 @@ namespace PluralsightBot.Dialogs
 
         private async Task<DialogTurnResult> SummaryStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            stepContext.Values["bug"] = ((FoundChoice)stepContext.Result).Value;
+            stepContext.Values[PropertiesEnum.bug.ToString()] = ((FoundChoice)stepContext.Result).Value;
 
             // Get the current profile object from user state.
             var userProfile = await _stateService.UserProfileAccessor.GetAsync(stepContext.Context, () => new UserProfile(), cancellationToken);
 
             // Save all of the data inside the user profile
-            userProfile.Description = (string)stepContext.Values["description"];
-            userProfile.CallbackTime = (DateTime)stepContext.Values["callbackTime"];
-            userProfile.PhoneNumber = (string)stepContext.Values["phoneNumber"];
-            userProfile.Bug = (string)stepContext.Values["bug"];
+            userProfile.Description = (string)stepContext.Values[PropertiesEnum.description.ToString()];
+            userProfile.CallbackTime = (DateTime)stepContext.Values[PropertiesEnum.callbackTime.ToString()];
+            userProfile.PhoneNumber = (string)stepContext.Values[PropertiesEnum.phoneNumber.ToString()];
+            userProfile.Bug = (string)stepContext.Values[PropertiesEnum.bug.ToString()];
 
             // Show the summary to the user
             await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Here is a summary of your bug report:"), cancellationToken);

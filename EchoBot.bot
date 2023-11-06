@@ -1,0 +1,18 @@
+{
+    "name": "EchoBot",
+    "description": "",
+    "services": [
+        {
+            "type": "endpoint",
+            "name": "http://localhost:3978/api/messages",
+            "id": "9dc354d0-7a5f-11ee-9764-0347799fd852",
+            "appId": "",
+            "appPassword": "",
+            "endpoint": "http://localhost:3978/api/messages"
+        }
+    ],
+    "padlock": "",
+    "version": "2.0",
+    "path": "C:\\www\\PluralsightBot\\EchoBot.bot",
+    "overrides": null
+}
