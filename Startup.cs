@@ -59,8 +59,8 @@ namespace PluralsightBot
         {
             // Create the storage we'll be using for User and Conversation state. (Memory is great for testing purposes.)
             // services.AddSingleton<IStorage, MemoryStorage>();
-            var storageAccount = "DefaultEndpointsProtocol=https;AccountName=botstoragetotraining;AccountKey=6gmosykFpd0pxr4S1+9C7w8o69cMzTdcvbUbSqN5WwveJh4z7UXSN2uxh/RKJLPANANjA1pJIpdQ+AStDDBmtw==;EndpointSuffix=core.windows.net";
-            var storageContainer = "mystatedata";
+            var storageAccount = Configuration["StorageAccount"];
+            var storageContainer = Configuration["StorageContainer"];
 
             services.AddSingleton<IStorage>(new BlobsStorage(storageAccount, storageContainer));
 
